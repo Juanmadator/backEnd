@@ -1,0 +1,246 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- CREAR TABLAS -->
+
+    <!-- Tabla de Usuarios -->
+    <changeSet id="1" author="Juanma" >
+        <createTable tableName="User">
+            <column name="UserID" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="Nombre" type="VARCHAR(255)"/>
+            <column name="Apellido" type="VARCHAR(255)"/>
+            <column name="Email" type="VARCHAR(255)"/>
+            <column name="Contraseña" type="VARCHAR(255)"/>
+            <column name="Fecha_registro" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="Ultima_fecha_inicio_sesion" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="Rol" type="ENUM('usuario', 'administrador','anonimo')"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Tabla de Publicaciones -->
+    <changeSet id="2" author="Juanma" >
+        <createTable tableName="Post">
+            <column name="PostID" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="Contenido" type="VARCHAR(255)"/>
+            <column name="Fecha_publicacion" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="UserID" type="INT"/>
+            <column name="FOREIGN KEY (UserID)" type="FOREIGN KEY" references="Users(UserID)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Tabla de Seguidores -->
+    <changeSet id="3" author="Juanma" >
+        <createTable tableName="Follower">
+            <column name="FollowerID" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="UserID" type="INT"/>
+            <column name="UserID_followed" type="INT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Tabla de Comentarios -->
+    <changeSet id="4" author="Juanma" >
+        <createTable tableName="Comment">
+            <column name="CommentID" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="Contenido" type="VARCHAR(255)"/>
+            <column name="Fecha_publicacion" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="UserID" type="INT"/>
+            <column name="PostID" type="INT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Tabla de Mensajes Privados -->
+    <changeSet id="5" author="Juanma" >
+        <createTable tableName="PrivateMessage">
+            <column name="MessageID" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="Contenido" type="VARCHAR(255)"/>
+            <column name="Fecha_envio" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="UserID_sender" type="INT"/>
+            <column name="UserID_receiver" type="INT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Tabla de Intereses -->
+    <changeSet id="6" author="Juanma" >
+        <createTable tableName="Interest">
+            <column name="InterestID" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="Descripcion" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Tabla de Usuarios_Intereses -->
+    <changeSet id="7" author="Juanma" >
+        <createTable tableName="User_Interest">
+            <column name="UserID" type="INT"/>
+            <column name="InterestID" type="INT">
+            <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Tabla de Alimentos -->
+    <changeSet id="8" author="Juanma" >
+        <createTable tableName="Food">
+            <column name="food_id" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="description" type="TEXT"/>
+            <column name="category_id" type="INT"/>
+            <column name="average_rating" type="DECIMAL(3,2)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Tabla de Categorías de Alimentos -->
+    <changeSet id="9" author="Juanma" >
+        <createTable tableName="FoodCategorie">
+            <column name="category_id" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Tabla de Nutrientes -->
+    <changeSet id="10" author="Juanma" >
+        <createTable tableName="Nutrient">
+            <column name="nutrient_id" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="unit" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Tabla de Detalles de Nutrientes -->
+    <changeSet id="11" author="Juanma" >
+        <createTable tableName="NutrientDetail">
+            <column name="detail_id" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="food_id" type="INT"/>
+            <column name="nutrient_id" type="INT"/>
+            <column name="value" type="DECIMAL(10,2)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Tabla de Valoraciones -->
+    <changeSet id="12" author="Juanma" >
+        <createTable tableName="Rate">
+            <column name="rating_id" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="food_id" type="INT"/>
+            <column name="user_id" type="INT"/>
+            <column name="rating" type="INT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- AÑADIR CLAVES FORÁNEAS -->
+
+    <!-- Clave foránea de la tabla Comments -->
+    <changeSet id="13" author="Juanma">
+        <addForeignKeyConstraint constraintName="fk_comments_user"
+                                 baseTableName="Comment"
+                                 baseColumnNames="UserID"
+                                 referencedTableName="User"
+                                 referencedColumnNames="UserID"/>
+
+        <addForeignKeyConstraint constraintName="fk_comments_post"
+                                 baseTableName="Comment"
+                                 baseColumnNames="PostID"
+                                 referencedTableName="Post"
+                                 referencedColumnNames="PostID"/>
+    </changeSet>
+
+    <!-- Clave foránea de la tabla PrivateMessages -->
+    <changeSet id="14" author="Juanma">
+        <addForeignKeyConstraint constraintName="fk_private_messages_users_sender"
+                                 baseTableName="PrivateMessage"
+                                 baseColumnNames="UserID_sender"
+                                 referencedTableName="User"
+                                 referencedColumnNames="UserID"/>
+
+        <addForeignKeyConstraint constraintName="fk_private_messages_users_receiver"
+                                 baseTableName="PrivateMessage"
+                                 baseColumnNames="UserID_receiver"
+                                 referencedTableName="User"
+                                 referencedColumnNames="UserID"/>
+    </changeSet>
+
+    <!-- Clave foránea de la tabla Users_Interests -->
+    <changeSet id="15" author="Juanma">
+        <addForeignKeyConstraint constraintName="fk_users_interests_users"
+                                 baseTableName="Users_Interest"
+                                 baseColumnNames="UserID"
+                                 referencedTableName="User"
+                                 referencedColumnNames="UserID"/>
+
+        <addForeignKeyConstraint constraintName="fk_user_interest"
+                                 baseTableName="User_Interest"
+                                 baseColumnNames="InterestID"
+                                 referencedTableName="Interest"
+                                 referencedColumnNames="InterestID"/>
+    </changeSet>
+
+    <!-- Clave foránea de la tabla Foods -->
+    <changeSet id="16" author="Juanma">
+        <addForeignKeyConstraint constraintName="fk_foods_foodcategories"
+                                 baseTableName="Food"
+                                 baseColumnNames="category_id"
+                                 referencedTableName="FoodCategorie"
+                                 referencedColumnNames="category_id"/>
+    </changeSet>
+
+    <!-- Clave foránea de la tabla NutrientDetails -->
+    <changeSet id="17" author="Juanma">
+        <addForeignKeyConstraint constraintName="fk_nutrientdetail_food"
+                                 baseTableName="NutrientDetail"
+                                 baseColumnNames="food_id"
+                                 referencedTableName="Food"
+                                 referencedColumnNames="food_id"/>
+
+        <addForeignKeyConstraint constraintName="fk_nutrientdetail_nutrient"
+                                 baseTableName="NutrientDetail"
+                                 baseColumnNames="nutrient_id"
+                                 referencedTableName="Nutrient"
+                                 referencedColumnNames="nutrient_id"/>
+    </changeSet>
+
+    <!-- Clave foránea de la tabla Ratings -->
+    <changeSet id="18" author="Juanma">
+        <addForeignKeyConstraint constraintName="fk_rating_food"
+                                 baseTableName="Rating"
+                                 baseColumnNames="food_id"
+                                 referencedTableName="Food"
+                                 referencedColumnNames="food_id"/>
+
+        <addForeignKeyConstraint constraintName="fk_rating_user"
+                                 baseTableName="Rating"
+                                 baseColumnNames="user_id"
+                                 referencedTableName="User"
+                                 referencedColumnNames="UserID"/>
+
+        <addForeignKeyConstraint constraintName="fk_post_user"
+                                 baseTableName="Post"
+                                 baseColumnNames="user_id"
+                                 referencedTableName="User"
+                                 referencedColumnNames="UserID"/>
+
+
+    </changeSet>
+
+</databaseChangeLog>
