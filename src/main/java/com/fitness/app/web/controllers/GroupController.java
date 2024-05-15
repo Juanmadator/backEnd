@@ -3,13 +3,16 @@ package com.fitness.app.web.controllers;
 import com.fitness.app.persistence.entities.Group;
 import com.fitness.app.persistence.entities.GroupMessage;
 import com.fitness.app.persistence.entities.User;
+import com.fitness.app.persistence.entities.UserGroup;
 import com.fitness.app.persistence.repositories.GroupMessageRepository;
 import com.fitness.app.persistence.repositories.GroupRepository;
 import com.fitness.app.persistence.repositories.UserRepository;
+import com.fitness.app.services.UserGroupService;
 import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -30,16 +33,19 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/groups")
+@Slf4j
+@RequiredArgsConstructor
 public class GroupController {
 
     @Autowired
     private GroupRepository groupRepository;
-
     @Autowired
     private GroupMessageRepository groupMessageRepository;
-
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserGroupService userGroupService;
+
     @Value("${file.upload-dir}")
     private String uploadDirectory = "";
 
@@ -126,7 +132,6 @@ public class GroupController {
     }
 
 
-
     //ELIMINAR UN GRUPO
     @DeleteMapping("/{groupId}")
     public ResponseEntity<?> deleteGroup(@PathVariable Long groupId) {
@@ -145,7 +150,7 @@ public class GroupController {
         }
     }
 
-//OBTENER TODOS LOS GRUPOS
+    //OBTENER TODOS LOS GRUPOS
     @GetMapping("/all/groups")
     public ResponseEntity<List<Group>> getAllGroups() {
         List<Group> groups = groupRepository.findAll();
@@ -237,7 +242,6 @@ public class GroupController {
     }
 
 
-
     @Getter
     @Setter
     public static class GroupMessageRequest {
@@ -276,7 +280,7 @@ public class GroupController {
     // Clase de respuesta para el cuerpo de la respuesta JSON
     @Getter
     @Setter
-  public  static class GroupMessageResponse {
+    public static class GroupMessageResponse {
         private Long id;
         private Long groupId;
         private Long senderId;
@@ -284,6 +288,72 @@ public class GroupController {
         private String fileUrl;
         private Date dateSent;
     }
+
+    //UNIR UN USUARIO A UN GRUPO
+    @PostMapping("/join")
+    public UserGroup joinGroup(@RequestBody UserGroup userGroup) {
+        return userGroupService.saveUserGroup(userGroup);
+    }
+
+    //contar miembros de un grupo
+    @GetMapping("/group/{groupId}/users/count")
+    public ResponseEntity<Long> getUsersCountInGroup(@PathVariable Long groupId) {
+        Long usersCount = userGroupService.countUsersInGroup(groupId);
+        return ResponseEntity.ok(usersCount);
+    }
+
+    //saber si un usuario pertenece o no a un grupo
+    @GetMapping("/user/{userId}/groups")
+    public ResponseEntity<List<Group>> getGroupsByUser(@PathVariable Long userId) {
+        List<Group> userGroups = userGroupService.getUserGroupsByUserId(userId);
+        return ResponseEntity.ok(userGroups);
+    }
+
+    //mostrar grupos a los que un usuario pertenece
+    @GetMapping("/group/{groupId}/user/{userId}/is-member")
+    public ResponseEntity<Boolean> checkUserMembership(@PathVariable Long groupId, @PathVariable Long userId) {
+        boolean isMember = userGroupService.isUserMemberOfGroup(groupId, userId);
+        return ResponseEntity.ok(isMember);
+    }
+
+
+
+    //OBTENER TODOS LOS GRUPOS CON PAGINACIÓN
+    @GetMapping("/all/groups/paginated")
+    public ResponseEntity<Page<Group>> getAllGroups(
+            @RequestParam() int page,
+            @RequestParam() int size
+    ) {
+        // Crear un objeto Pageable para la paginación
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Obtener los grupos paginados
+        Page<Group> groupsPage = groupRepository.findAll(pageable);
+
+        // Verificar si hay grupos disponibles
+        if (groupsPage.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(groupsPage);
+        }
+    }
+
+
+
+
+    //ELIMINAR UN USERGROUP
+    @DeleteMapping("/userGroup/{userGroupId}")
+    public ResponseEntity<?> deleteUserGroup(@PathVariable Long userGroupId) {
+        try {
+            userGroupService.deleteUserGroupById(userGroupId);
+            return ResponseEntity.ok().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 
 
 }

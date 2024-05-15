@@ -1,14 +1,5 @@
-# Usa una imagen de Java como base
-FROM openjdk:11-jre-slim
+FROM adoptopenjdk/openjdk11:alpine
 
-# Establece el directorio de trabajo dentro del contenedor
-WORKDIR /app
+COPY target/socialFitnessBackEnd-0.0.1-SNAPSHOT.jar /app/socialFitnessBackEnd-0.0.1-SNAPSHOT.jar
 
-# Copia el archivo JAR construido de tu aplicación Spring Boot al directorio de trabajo en el contenedor
-COPY target/socialFitnessBackEnd.jar app.jar
-
-# Expone el puerto en el que tu aplicación Spring Boot escucha las solicitudes
-EXPOSE 8080
-
-# Comando para ejecutar la aplicación Spring Boot cuando el contenedor se inicie
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "/app/socialFitnessBackEnd-0.0.1-SNAPSHOT.jar"]
