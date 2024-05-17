@@ -3,7 +3,7 @@ FROM maven:3.8.3-openjdk-17 AS build
 WORKDIR /workspace/app
 COPY pom.xml .
 COPY src src
-RUN mvn -B -e -C clean package
+RUN mvn -B  -e -X -C clean package
 
 # Stage 2: Run
 FROM openjdk:17
