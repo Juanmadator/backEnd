@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '21'
+          distribution: 'single'
 
       - name: Build with Maven
         run: mvn clean install
@@ -56,4 +57,4 @@ jobs:
           app-name: 'fit-track'
           slot-name: 'Production'
           package: '*.jar'
-          distribution: 'single'
+        
