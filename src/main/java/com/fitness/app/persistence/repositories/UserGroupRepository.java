@@ -15,7 +15,7 @@ public interface UserGroupRepository extends JpaRepository<UserGroup,Long> {
     Long countByGroupId(Long groupId);
 
 
-    void deleteByUserId(Long id);
+    void deleteByUserIdAndGroupId(Long userId,Long groupId);
     boolean existsByGroupIdAndUserId(Long groupId, Long userId);
 
 

@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -89,18 +90,11 @@ public class GroupController {
                 }
             }
 
-            // Crear un nuevo objeto FitnessGroup
             Group group = new Group();
-            // Establecer el nombre del grupo
             group.setName(name);
-            // Establecer la descripción del grupo
             group.setDescription(description);
-            // Establecer el ID del coach en el grupo
             group.setCoachId(coachId);
-            // Establecer la URL de la imagen de perfil en el grupo si existe
             group.setProfileImage(profileImageUrl);
-
-            // Guardar el grupo en la base de datos
             Group createdGroup = groupRepository.save(group);
 
             return ResponseEntity.ok(createdGroup);
@@ -226,7 +220,6 @@ public class GroupController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo adjunto");
             }
         }
-
         // Crear el mensaje del grupo
         GroupMessage groupMessage = new GroupMessage();
         groupMessage.setGroup(group);
@@ -290,10 +283,7 @@ public class GroupController {
     }
 
     //UNIR UN USUARIO A UN GRUPO
-    @PostMapping("/join")
-    public UserGroup joinGroup(@RequestBody UserGroup userGroup) {
-        return userGroupService.saveUserGroup(userGroup);
-    }
+
 
     //contar miembros de un grupo
     @GetMapping("/group/{groupId}/users/count")
@@ -339,20 +329,21 @@ public class GroupController {
     }
 
 
-
+    @PostMapping("/join")
+    public UserGroup joinGroup(@RequestBody UserGroup userGroup) {
+        return userGroupService.saveUserGroup(userGroup);
+    }
 
     //ELIMINAR UN USERGROUP
-    @DeleteMapping("/userGroup/{userGroupId}")
-    public ResponseEntity<?> deleteUserGroup(@PathVariable Long userGroupId) {
-        try {
-            userGroupService.deleteUserGroupById(userGroupId);
+    @Transactional
+    @DeleteMapping("/userGroup/{userId}/{groupId}")
+    public ResponseEntity<?> deleteUserGroup(@PathVariable Long userId, @PathVariable Long groupId) {
+            userGroupService.deleteByUserIdAndGroupId(userId, groupId);
             return ResponseEntity.ok().build();
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
     }
+
+
+
 
 
 

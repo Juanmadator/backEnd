@@ -29,6 +29,9 @@ public class Group {
     @Column(name = "coach_id", nullable = false)
     private Long coachId;
 
+    @Column(name = "coachName")
+    private String coachName;
+
     @Column(name = "profile_image")
     private String profileImage;
 

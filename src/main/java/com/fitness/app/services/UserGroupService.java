@@ -24,8 +24,8 @@ public class UserGroupService {
     private final GroupRepository groupRepository;
 
 
-    public void deleteUserGroupById(Long id){
-        userGroupRepository.deleteByUserId(id);
+    public void deleteByUserIdAndGroupId(Long userId, Long groupId) {
+        userGroupRepository.deleteByUserIdAndGroupId(userId, groupId);
     }
 
     public List<Group> getUserGroupsByUserId(Long userId) {
