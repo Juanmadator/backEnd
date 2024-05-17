@@ -60,4 +60,5 @@ jobs:
           app-name: 'fit-track'
           slot-name: 'Production'
           package: '*.jar'
+          distribution: 'single'
           
