@@ -38,7 +38,7 @@ public class AuthController {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
-    private final String URL = "http://localhost:4200";
+    private final String URL = "https://jadator.netlify.app/";
 
 
     @Autowired
