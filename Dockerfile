@@ -14,8 +14,11 @@ RUN cat /workspace/app/pom.xml
 COPY src ./src
 RUN ls -la /workspace/app/src
 
-# Ejecutar la construcción de Maven
-RUN mvn -B -e -X clean package
+# Ajustar permisos de archivos
+RUN chmod -R 755 /workspace/app
+
+# Ejecutar la construcción de Maven sin modo batch para más detalles
+RUN mvn -e -X clean package
 
 # Stage 2: Run
 FROM openjdk:17
