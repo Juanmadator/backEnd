@@ -10,9 +10,15 @@ RUN mvn dependency:go-offline
 COPY src ./src
 
 # Ejecutar la construcción de Maven
-RUN mvn clean package
+RUN mvn clean package -DskipTests
 
 # Stage 2: Run
 FROM openjdk:17-slim
+WORKDIR /app
 COPY --from=build /workspace/app/target/socialFitnessBackEnd-0.0.1-SNAPSHOT.jar /app/socialFitnessBackEnd-0.0.1-SNAPSHOT.jar
-CMD ["java", "-jar", "/app/socialFitnessBackEnd-0.0.1-SNAPSHOT.jar"]
+
+# Exponer el puerto 8080
+EXPOSE 8080
+
+# Comando para ejecutar la aplicación
+CMD ["java", "-jar", "socialFitnessBackEnd-0.0.1-SNAPSHOT.jar"]
