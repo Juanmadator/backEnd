@@ -6,8 +6,15 @@ WORKDIR /workspace/app
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
+# Verificar el contenido del directorio y el archivo pom.xml
+RUN ls -la /workspace/app
+RUN cat /workspace/app/pom.xml
+
 # Copiar el código fuente del proyecto y construir
 COPY src ./src
+RUN ls -la /workspace/app/src
+
+# Ejecutar la construcción de Maven
 RUN mvn -B -e -X clean package
 
 # Stage 2: Run
