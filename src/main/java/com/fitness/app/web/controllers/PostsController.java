@@ -1,8 +1,10 @@
 package com.fitness.app.web.controllers;
 
 
+import com.fitness.app.persistence.entities.Comment;
 import com.fitness.app.persistence.entities.Favourite;
 import com.fitness.app.persistence.entities.Post;
+import com.fitness.app.persistence.repositories.CommentRepository;
 import com.fitness.app.persistence.repositories.FavouriteRepository;
 import com.fitness.app.persistence.repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +29,11 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,9 +44,10 @@ public class PostsController {
 
     private final PostRepository postRepository;
     private final FavouriteRepository favouriteRepository;
+    private final CommentRepository commentRepository;
 
     @Value("${file.upload-dir}")
-    private  String uploadDirectory="";
+    private String uploadDirectory = "";
 
     @GetMapping("/{filename:.+}")
     @ResponseBody
@@ -79,13 +83,15 @@ public class PostsController {
                 // Verificar si el directorio de carga existe
                 Path directoryPath = Paths.get(uploadDirectory);
                 if (!Files.exists(directoryPath)) {
-                    return ResponseEntity.badRequest().build();
+                    Files.createDirectories(directoryPath);
                 }
 
                 // Guardar la imagen en el servidor
                 String filename = userId + "-" + image.getOriginalFilename();
                 Path imagePath = directoryPath.resolve(filename);
-                Files.write(imagePath, image.getBytes());
+
+                // Guardar la imagen en el servidor sin optimización
+                Files.copy(image.getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
 
                 // Verificar si el archivo se ha guardado correctamente
                 if (Files.exists(imagePath) && Files.size(imagePath) > 0) {
@@ -123,7 +129,6 @@ public class PostsController {
 
 
 
-
     @GetMapping("/posts")
     public ResponseEntity<List<Post>> getAllPosts(
             @RequestParam("page") int page,
@@ -138,6 +143,28 @@ public class PostsController {
         }
 
         return ResponseEntity.ok(postPage.getContent());
+    }
+
+    @DeleteMapping("/posts/{postId}/{userId}")
+    public ResponseEntity<Void> deletePostByUserIdAndPostId(
+            @PathVariable("userId") Long userId,
+            @PathVariable("postId") Long postId
+    ) {
+        // Verificar si el post pertenece al usuario especificado
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isPresent()) {
+            Post post = optionalPost.get();
+            if (post.getUserId().equals(userId)) {
+                postRepository.deleteById(postId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else {
+                // El post no pertenece al usuario especificado
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        } else {
+            // No se encontró el post con el postId especificado
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
 
@@ -196,10 +223,34 @@ public class PostsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    
+    //COMENTARIOS
+    //CREAR UN COMENTARIO
+    @PostMapping("/comment")
+    public ResponseEntity<Comment> createComment(@RequestBody Comment comment) {
+        Comment createdComment = commentRepository.save(comment);
+        return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
+    }
+
+    //COMMENTS DE UN PSOT
+    @GetMapping("/posts/comments/{postId}")
+    public ResponseEntity<List<Comment>> getAllCommentsByPostId(@PathVariable("postId") Long postId) {
+        List<Comment> comments = commentRepository.findByPostId(postId);
+        return new ResponseEntity<>(comments, HttpStatus.OK);
+    }
 
 
+    //ELIMINAR UN COMENTARIO
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable("commentId") Long commentId) {
+        if (commentRepository.existsById(commentId)) {
+            commentRepository.deleteById(commentId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
 
-
+        }
+    }
 
 }

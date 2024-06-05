@@ -6,10 +6,9 @@ com\fitness\app\auth\AuthController$1.class
 com\fitness\app\auth\AuthResponse$AuthResponseBuilder.class
 com\fitness\app\persistence\repositories\GroupRepository.class
 com\fitness\app\persistence\repositories\PostRepositoryPagination.class
+com\fitness\app\persistence\repositories\CommentRepository.class
 com\fitness\app\persistence\repositories\FavouriteRepository.class
-com\fitness\app\persistence\repositories\PasswordResetTokenRepository.class
 com\fitness\app\config\ApplicationConfig.class
-com\fitness\app\persistence\entities\PasswordResetToken.class
 com\fitness\app\persistence\repositories\RoleRepository.class
 com\fitness\app\web\controllers\FavouritesController.class
 com\fitness\app\auth\RegisterRequest.class

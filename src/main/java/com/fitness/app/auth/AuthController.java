@@ -1,10 +1,8 @@
 package com.fitness.app.auth;
 
 
-import com.fitness.app.persistence.entities.PasswordResetToken;
 import com.fitness.app.persistence.entities.User;
 import com.fitness.app.persistence.entities.VerificationToken;
-import com.fitness.app.persistence.repositories.PasswordResetTokenRepository;
 import com.fitness.app.persistence.repositories.TokenRepository;
 import com.fitness.app.persistence.repositories.UserRepository;
 import com.fitness.app.services.EmailService;
@@ -12,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -24,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -35,10 +31,9 @@ public class AuthController {
     private final AuthService authService;
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
-    private final String URL = "https://jadator.netlify.app/";
+    private final String URL = "http://localhost:4200";
 
 
     @Autowired
@@ -67,30 +62,9 @@ public class AuthController {
 
 
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestParam("token") String token, @RequestParam("password") String newPassword) {
-        // Validar el token de recuperación de contraseña
-        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token);
-        if (resetToken == null || resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("El token de restablecimiento de contraseña es inválido o ha caducado.");
-        }
-        // Obtener el usuario asociado al token
-        User user = resetToken.getUser();
-        // Codificar la nueva contraseña
-        String newPasswordEncoded = passwordEncoder.encode(newPassword);
-        // Actualizar la contraseña del usuario
-        user.setPassword(newPasswordEncoded);
-        userRepository.save(user);
-        // Eliminar el token de recuperación de contraseña
-        passwordResetTokenRepository.delete(resetToken);
-        return ResponseEntity.ok("Su contraseña ha sido restablecida con éxito.");
-    }
 
-    @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
-        ResponseEntity<String> response = authService.forgotPassword(email);
-        return response;
-    }
+
+
 
 
     @PostMapping("/checkName")

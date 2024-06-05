@@ -31,10 +31,8 @@ public class UserGroupService {
     public List<Group> getUserGroupsByUserId(Long userId) {
         // Obtener los UserGroup asociados con el usuario
         List<UserGroup> userGroups = userGroupRepository.findByUserId(userId);
-        log.info("GRUPOS {}",userGroups);
         // Lista para almacenar la información completa de cada grupo
         List<Group> completeGroups = new ArrayList<>();
-
         // Obtener la información completa de cada grupo a partir de sus IDs
         for (UserGroup userGroup : userGroups) {
             Long groupId = userGroup.getGroupId();
@@ -43,7 +41,6 @@ public class UserGroupService {
                 completeGroups.add(group);
             }
         }
-
         return completeGroups;
     }
 

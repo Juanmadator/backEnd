@@ -8,16 +8,11 @@ import com.fitness.app.persistence.repositories.GroupMessageRepository;
 import com.fitness.app.persistence.repositories.GroupRepository;
 import com.fitness.app.persistence.repositories.UserRepository;
 import com.fitness.app.services.UserGroupService;
-import jakarta.validation.Valid;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +30,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/groups")
 @Slf4j
-@RequiredArgsConstructor
 public class GroupController {
 
     @Autowired
@@ -90,11 +84,25 @@ public class GroupController {
                 }
             }
 
+            // Obtener el usuario (coach) correspondiente al coachId
+            Optional<User> optionalUser = userRepository.findById(coachId);
+            if (!optionalUser.isPresent()) {
+                // Si no se encuentra el usuario, devuelve una respuesta de error
+                return ResponseEntity.badRequest().build();
+            }
+            User coach = optionalUser.get();
+
+            // Obtener el username del usuario (coach)
+            String coachUsername = coach.getUsername();
+
+            // Crear el grupo y establecer el username del coach
             Group group = new Group();
             group.setName(name);
             group.setDescription(description);
             group.setCoachId(coachId);
+            group.setCoachName(coachUsername); // Establecer el username del coach en el grupo
             group.setProfileImage(profileImageUrl);
+
             Group createdGroup = groupRepository.save(group);
 
             return ResponseEntity.ok(createdGroup);
@@ -106,6 +114,7 @@ public class GroupController {
             return ResponseEntity.badRequest().build();
         }
     }
+
 
 
     //GET GROUP POR EL ID
@@ -147,11 +156,13 @@ public class GroupController {
     //OBTENER TODOS LOS GRUPOS
     @GetMapping("/all/groups")
     public ResponseEntity<List<Group>> getAllGroups() {
-        List<Group> groups = groupRepository.findAll();
-        if (groups.isEmpty()) {
+        // Obtener todos los grupos
+        List<Group> allGroups = groupRepository.findAll();
+        // Verificar si hay grupos disponibles
+        if (allGroups.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.ok(groups);
+            return ResponseEntity.ok(allGroups);
         }
     }
 
@@ -174,6 +185,9 @@ public class GroupController {
             return ResponseEntity.notFound().build();
         }
     }
+
+
+
 
 
     @PostMapping("/{groupId}/send")
@@ -244,19 +258,12 @@ public class GroupController {
 
 
     @GetMapping("/group/{groupId}/messages")
-    public ResponseEntity<Page<GroupMessageResponse>> getGroupMessages(
-            @PathVariable Long groupId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        // Crear un objeto Pageable para la paginación
-        Pageable pageable = PageRequest.of(page, size);
-
-        // Buscar todos los mensajes del grupo por su ID de grupo con paginación
-        Page<GroupMessage> groupMessagePage = groupMessageRepository.findByGroupId(groupId, pageable);
+    public ResponseEntity<List<GroupMessageResponse>> getGroupMessages(@PathVariable Long groupId) {
+        // Buscar todos los mensajes del grupo por su ID de grupo
+        List<GroupMessage> groupMessages = groupMessageRepository.findByGroupId(groupId);
 
         // Convertir los mensajes del grupo en respuestas de mensajes del grupo
-        Page<GroupMessageResponse> responsePage = groupMessagePage.map(message -> {
+        List<GroupMessageResponse> responseList = groupMessages.stream().map(message -> {
             GroupMessageResponse response = new GroupMessageResponse();
             response.setId(message.getId());
             response.setGroupId(message.getGroup().getId());
@@ -265,10 +272,11 @@ public class GroupController {
             response.setDateSent(message.getDateSent());
             response.setFileUrl(message.getFileUrl());
             return response;
-        });
+        }).collect(Collectors.toList());
 
-        return ResponseEntity.ok(responsePage);
+        return ResponseEntity.ok(responseList);
     }
+
 
     // Clase de respuesta para el cuerpo de la respuesta JSON
     @Getter
@@ -306,27 +314,6 @@ public class GroupController {
         return ResponseEntity.ok(isMember);
     }
 
-
-
-    //OBTENER TODOS LOS GRUPOS CON PAGINACIÓN
-    @GetMapping("/all/groups/paginated")
-    public ResponseEntity<Page<Group>> getAllGroups(
-            @RequestParam() int page,
-            @RequestParam() int size
-    ) {
-        // Crear un objeto Pageable para la paginación
-        Pageable pageable = PageRequest.of(page, size);
-
-        // Obtener los grupos paginados
-        Page<Group> groupsPage = groupRepository.findAll(pageable);
-
-        // Verificar si hay grupos disponibles
-        if (groupsPage.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(groupsPage);
-        }
-    }
 
 
     @PostMapping("/join")

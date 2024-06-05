@@ -14,5 +14,5 @@ import java.util.List;
 public interface GroupMessageRepository extends JpaRepository<GroupMessage,Long> {
 
 
-    Page<GroupMessage> findByGroupId(Long id, Pageable pageable);
+    List<GroupMessage> findByGroupId(Long id);
 }

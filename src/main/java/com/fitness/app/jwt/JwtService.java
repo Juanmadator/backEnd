@@ -1,6 +1,5 @@
 package com.fitness.app.jwt;
 
-import com.fitness.app.persistence.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -58,10 +57,8 @@ public class JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username=getUserNameFromToken(token);
         if(username.equals(userDetails.getUsername()) && !isTokenExpired(token)){
-            log.info("VALIDADO...");
             return true;
         }
-        log.info("no se pudo validar...");
         return false;
     }
 

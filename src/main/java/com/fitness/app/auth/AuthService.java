@@ -2,11 +2,9 @@ package com.fitness.app.auth;
 
 
 import com.fitness.app.exceptions.InvalidPasswordException;
-import com.fitness.app.exceptions.InvalidUsernameException;
 import com.fitness.app.exceptions.UserNotVerified;
 import com.fitness.app.jwt.JwtService;
 import com.fitness.app.persistence.entities.*;
-import com.fitness.app.persistence.repositories.PasswordResetTokenRepository;
 import com.fitness.app.persistence.repositories.RoleRepository;
 import com.fitness.app.persistence.repositories.TokenRepository;
 import com.fitness.app.persistence.repositories.UserRepository;
@@ -18,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,7 +36,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     private final String URL = "http://localhost:8080";
 
@@ -155,9 +151,29 @@ public class AuthService {
             userRepository.save(user);
             tokenRepository.save(verificationToken);
             // Enviar el correo electrónico de verificación
-            emailService.sendConfirmationEmail(user.getEmail(), "Verificación de correo electrónico",
-                    "Por favor, haga clic en el siguiente enlace para verificar su cuenta: " +
-                            "<a href='" + URL + "/auth/verify?token=" + token + "'>Clic aquí para verificar tu cuenta</a>");
+            String emailContent = "<div style='"
+                    + "font-family: Arial, sans-serif;"
+                    + "padding: 20px;"
+                    + "background-color: #f9f9f9;"
+                    + "color: #333;"
+                    + "'>"
+                    + "<h2 style='"
+                    + "color: hsl(252, 75%, 65%);"
+                    + "'>Confirmación de tu cuenta</h2>"
+                    + "<p>¡Hola! Estamos emocionados de tenerte con nosotros. Por favor, confirma tu cuenta haciendo clic en el siguiente enlace:</p>"
+                    + "<a href='" + URL + "/auth/verify?token=" + token + "' style='"
+                    + "display: inline-block;"
+                    + "color: #FFFFFF;"
+                    + "background-color: hsl(252, 75%, 65%);"
+                    + "padding: 12px 24px;"
+                    + "text-decoration: none;"
+                    + "border-radius: 4px;"
+                    + "'>Confirma tu cuenta aquí</a>"
+                    + "<p>¡Gracias por unirte a Fit-Track!</p>"
+                    + "</div>";
+
+            emailService.sendConfirmationEmail(user.getEmail(), "Confirmación de tu cuenta", emailContent);
+
 
             return AuthResponse.builder().token(jwtService.getToken(user)).build();
         } catch (Exception e) {
@@ -167,27 +183,7 @@ public class AuthService {
     }
 
 
-    public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            return ResponseEntity.badRequest().body("El correo electrónico proporcionado no está registrado.");
-        }
 
-        // Generar y guardar un token de recuperación de contraseña
-        String token = UUID.randomUUID().toString();
-        PasswordResetToken resetToken = new PasswordResetToken();
-        resetToken.setToken(token);
-        resetToken.setUser(user);
-        resetToken.setExpiryDate(LocalDateTime.now().plusHours(24)); // Válido por 24 horas
-        passwordResetTokenRepository.save(resetToken);
-
-        // Enviar correo electrónico con el enlace de restablecimiento de contraseña
-        emailService.sendPasswordResetEmail(user.getEmail(), "Restablecer contraseña",
-                "Haga clic en el siguiente enlace para restablecer su contraseña: " +
-                        "http://localhost:8080/reset-password?token=" + token);
-
-        return ResponseEntity.ok("Se ha enviado un correo electrónico con las instrucciones para restablecer su contraseña.");
-    }
 
     private static VerificationToken getVerificationToken(String token, User user, int tokenValidityDurationInMinutes) {
         VerificationToken verificationToken = new VerificationToken();
