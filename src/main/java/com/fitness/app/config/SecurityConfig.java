@@ -26,7 +26,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://jadator.netlify.app","http://localhost:4200") // Permitir solicitudes desde http://localhost:4200
+                .allowedOrigins("https://jadator.netlify.app/","http://localhost:4200/") // Permitir solicitudes desde http://localhost:4200
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
                 .allowCredentials(true);

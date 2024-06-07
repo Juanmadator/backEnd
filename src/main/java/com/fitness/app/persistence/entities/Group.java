@@ -35,7 +35,7 @@ public class Group {
     @Column(name = "profile_image")
     private String profileImage;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
