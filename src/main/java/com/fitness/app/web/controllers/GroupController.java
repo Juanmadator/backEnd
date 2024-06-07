@@ -102,7 +102,7 @@ public class GroupController {
             group.setCoachId(coachId);
             group.setCoachName(coachUsername); // Establecer el username del coach en el grupo
             group.setProfileImage(profileImageUrl);
-
+            group.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             Group createdGroup = groupRepository.save(group);
 
             return ResponseEntity.ok(createdGroup);
