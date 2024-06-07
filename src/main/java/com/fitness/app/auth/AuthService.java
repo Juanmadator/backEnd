@@ -37,7 +37,7 @@ public class AuthService {
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
 
-    private final String URL = "http://localhost:8080";
+    private final String URL = "https://juanmadatortfg.onrender.com";
 
     public AuthResponse login(LoginRequest request) {
         UserDetails user = userRepository.findByUsername(request.getUsername());
