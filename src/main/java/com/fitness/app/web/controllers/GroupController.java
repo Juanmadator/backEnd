@@ -102,16 +102,19 @@ public class GroupController {
             group.setCoachId(coachId);
             group.setCoachName(coachUsername); // Establecer el username del coach en el grupo
             group.setProfileImage(profileImageUrl);
-            group.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            group.setCreatedAt(new Timestamp(System.currentTimeMillis())); // Establecer la fecha y hora actuales
+
             Group createdGroup = groupRepository.save(group);
 
             return ResponseEntity.ok(createdGroup);
         } catch (IOException e) {
             // Si ocurre un error de E/S al guardar el archivo, devuelve una respuesta de error
-            return ResponseEntity.badRequest().build();
+            log.error("IO Exception while saving profile image", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("IO Exception while saving profile image.");
         } catch (Exception e) {
             // Si ocurre un error inesperado, devuelve una respuesta de error
-            return ResponseEntity.badRequest().build();
+            log.error("Unexpected error while creating group", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error while creating group.");
         }
     }
 
