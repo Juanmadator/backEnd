@@ -16,23 +16,23 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value="/api/v1/users")
+@RequestMapping(value = "/api/v1/users")
 public class UsersController {
     private final UserService userService;
 
     @GetMapping(value = "{id}")
-    public ResponseEntity<Optional<User>>getUser(@PathVariable Long id){
-        Optional<User> user= userService.getUser(id);
+    public ResponseEntity<Optional<User>> getUser(@PathVariable Long id) {
+        Optional<User> user = userService.getUser(id);
         return ResponseEntity.ok(user);
     }
 
 
-    @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<User> updateUser(
             @RequestParam("username") String username,
             @RequestParam("name") String name,
             @RequestParam("lastname") String lastname,
-            @RequestParam("age") @DateTimeFormat(pattern="yyyy-MM-dd") Date age,
+            @RequestParam("age") @DateTimeFormat(pattern = "yyyy-MM-dd") Date age,
             @RequestParam("gender") String gender,
             @RequestParam("country") String country,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
@@ -59,22 +59,20 @@ public class UsersController {
 
 
     @DeleteMapping(value = "/{id}")
-public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-    boolean isRemoved = userService.deleteUser(id);
-    if (!isRemoved) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        boolean isRemoved = userService.deleteUser(id);
+        if (!isRemoved) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-}
 
 
-@GetMapping
-public ResponseEntity<List<User>> getAllUsers() {
-    List<User> users = userService.getAllUsers();
-    return ResponseEntity.ok(users);
-}
-
-
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
 
 
 }
