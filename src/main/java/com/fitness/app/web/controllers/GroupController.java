@@ -51,7 +51,6 @@ public class GroupController {
         this.userRepository = userRepository;
     }
 
-
     //CREAR UN GRUPO
     @PostMapping(value = "/create/{coachId}", consumes = {"multipart/form-data"})
     public ResponseEntity<Group> createGroup(
@@ -326,8 +325,8 @@ public class GroupController {
     @Transactional
     @DeleteMapping("/userGroup/{userId}/{groupId}")
     public ResponseEntity<?> deleteUserGroup(@PathVariable Long userId, @PathVariable Long groupId) {
-            userGroupService.deleteByUserIdAndGroupId(userId, groupId);
-            return ResponseEntity.ok().build();
+        userGroupService.deleteByUserIdAndGroupId(userId, groupId);
+        return ResponseEntity.ok().build();
     }
 
 
