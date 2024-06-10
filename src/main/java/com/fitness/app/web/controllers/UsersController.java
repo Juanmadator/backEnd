@@ -4,6 +4,8 @@ package com.fitness.app.web.controllers;
 import com.fitness.app.persistence.entities.User;
 import com.fitness.app.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,8 +71,11 @@ public class UsersController {
 
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<Page<User>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<User> users = userService.getAllUsers(PageRequest.of(page, size));
         return ResponseEntity.ok(users);
     }
 

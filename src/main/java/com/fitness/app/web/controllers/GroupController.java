@@ -13,6 +13,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -166,6 +170,20 @@ public class GroupController {
         }
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<Page<Group>> getAllGroups(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+        Page<Group> groupPage = groupRepository.findAll(pageable);
+
+        if (groupPage.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(groupPage);
+        }
+    }
 
     //OBTENER NOMBRES DE USUARIO DE LOS COACH QUE HAN CREADO EL GRUPO
     @GetMapping("/{groupId}")
