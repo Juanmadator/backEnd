@@ -33,4 +33,6 @@ public class RegisterRequest {
      String gender;
 
      String country;
+
+     String role;
 }
