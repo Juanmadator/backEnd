@@ -57,6 +57,23 @@ public class UsersController {
     }
 
 
+    @DeleteMapping(value = "/{id}")
+public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    boolean isRemoved = userService.deleteUser(id);
+    if (!isRemoved) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+}
+
+
+@GetMapping
+public ResponseEntity<List<User>> getAllUsers() {
+    List<User> users = userService.getAllUsers();
+    return ResponseEntity.ok(users);
+}
+
+
 
 
 }
